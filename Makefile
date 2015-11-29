@@ -1,0 +1,2 @@
+default: 
+	pdflatex math.tex

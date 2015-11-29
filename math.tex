@@ -1,0 +1,119 @@
+\documentclass{article}
+\usepackage{amsmath}
+
+\begin{document}
+
+\section{Current Formulation}
+
+\subsection{POMDP}
+
+\begin{itemize}
+	\item $S = \langle \omega, \mathcal{O}, ds\rangle$
+
+	\item $A = \{ \texttt{wait}, \texttt{pick(object)}, \texttt{ask(property)} \}$
+	\item $T = p(\omega^\prime, \mathcal{O}^\prime, ds^\prime| \omega, \mathcal{O}, ds, a)$
+
+		If $a$ is a pick action and $a.object == \omega$:
+		\begin{equation*}
+			p(\omega^\prime, \mathcal{O}^\prime, ds^\prime| \omega, \mathcal{O}, ds, a) = \begin{cases}
+				1 / |\mathcal{O} \setminus \omega| & \text{ if $\omega^\prime != \omega, ds = None, \mathcal{O}^\prime = \mathcal{O}\setminus \omega$} \\
+				0 & \text{otherwise}
+			\end{cases}
+		\end{equation*}
+
+		If $a$ is a pick action and $a.object != \omega$, we transition to the state where $s^\prime = \langle \omega^\prime, \mathcal{O}^\prime, ds^\prime \rangle = \langle \omega, \mathcal{O} \setminus a.object, ds\rangle$. 
+
+	\item 
+		\begin{equation*}
+			R(\omega, \mathcal{O}, ds, a) = 
+			\begin{cases}
+				10 & \text{ if a == \texttt{pick} and a.object == $\omega$} \\
+				-80 & \text{ if a == \texttt{pick} and a.object != $\omega$} \\
+				-1 & \text{ if a == \texttt{wait}} \\
+				-3 & \text{ if a == \texttt{ask}}
+			\end{cases}
+		\end{equation*}
+	\item $\Omega = \langle l, g \rangle$
+	\item $O = p(l, g | \omega, \mathcal{O}, ds, a) = p(l | \omega, \mathcal{O}, ds, a)  p(g | \omega, \mathcal{O}, ds, a)    $
+
+\begin{align}
+	p(l|\mathcal{O},\omega,a) &= 
+p(c|\omega^{t+1}, a^t)\prod_{w \in l} p(w|\omega,a)
+\end{align}
+
+
+\begin{equation}
+	p(c|a^t) = \begin{cases}
+		0.8 & \text{if $a^t$ is a question} \\
+		0.2 & \text{otherwise}
+	\end{cases}
+\end{equation}
+
+$$p(w|\omega, a) = \frac{\text{Number of times $w$ is used to describe $\omega$}}{ \text{Total counts for words describing $\omega$}}$$
+
+
+etc etc etc
+
+
+\end{itemize}
+
+Currently this is being solved with a hacked together cached method, where Belief Sparse Sampling is being run in simulation, and belief states and their corresponding actions are cached and reused for running interactively. 
+
+This can also probably be done using POMCP. 
+
+\section{Incremental Actions}
+
+\section{Theory of Mind} 
+
+\subsection{Robot Model}
+The robot acts according to the following model: 
+
+\begin{itemize}
+	\item $S = \langle \omega, \mathcal{O}, ds, B_h \rangle$
+
+	\item $A = \{ \texttt{wait}, \texttt{pick(object)}, \texttt{ask(property)} \}$
+	\item $T = p(\omega^\prime, \mathcal{O}^\prime, ds^\prime| \omega, \mathcal{O}, ds, a)$
+
+		If $a$ is a pick action and $a.object == \omega$:
+		\begin{equation*}
+			p(\omega^\prime, \mathcal{O}^\prime, ds^\prime| \omega, \mathcal{O}, ds, a) = \begin{cases}
+				1 / |\mathcal{O} \setminus \omega| & \text{ if $\omega^\prime != \omega, ds = None, \mathcal{O}^\prime = \mathcal{O}\setminus \omega$} \\
+				0 & \text{otherwise}
+			\end{cases}
+		\end{equation*}
+
+		If $a$ is a pick action and $a.object != \omega$, we transition to the state where $s^\prime = \langle \omega^\prime, \mathcal{O}^\prime, ds^\prime \rangle = \langle \omega, \mathcal{O} \setminus a.object, ds\rangle$. 
+
+	\item 
+		\begin{equation*}
+			R(\omega, \mathcal{O}, ds, a) = 
+			\begin{cases}
+				10 & \text{ if a == \texttt{pick} and a.object == $\omega$} \\
+				-80 & \text{ if a == \texttt{pick} and a.object != $\omega$} \\
+				-1 & \text{ if a == \texttt{wait}} \\
+				-3 & \text{ if a == \texttt{ask}}
+			\end{cases}
+		\end{equation*}
+	\item $\Omega = \langle l, g \rangle$
+	\item $O = p(l, g | \omega, \mathcal{O}, ds, a)$
+		
+		Instead of having to guess what this is, we instead can sample from the policy of a POMDP/MDP that describes how the human behaves in response to the human. 
+			
+\end{itemize}
+
+
+\subsection{Human Model}
+\begin{itemize}
+	\item $S = \langle \omega, B_h, \mathcal{O} ds \rangle$
+
+		$\omega$ is the item the human wants, $B_h$ is the item the human believes the robot will hand them. 
+		\item $A = \{ \texttt{wait}, \texttt{say(property)}, \texttt{point(target)} \}$
+
+\end{itemize}
+
+
+
+
+
+
+\end{document}
