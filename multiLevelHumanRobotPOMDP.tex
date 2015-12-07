@@ -1,0 +1,99 @@
+%% Things to do
+\documentclass{article}
+\usepackage{amsmath}
+
+\begin{document}
+
+\section{Human (PO)MDP}
+This is a MDP that the human runs in their mind. It can be formalized as a POMDP, but right now we have a weak POMDP with a a belief distribution over the robot's distribution of objects.
+
+
+
+
+\begin{enumerate}
+
+	\item $S = \langle \iota, \mathcal{I}, d, H \rangle$
+	\begin{enumerate}
+	\item Here $\mathcal{I}$ is the set of items the robot can pass. 
+	\item Item $\iota$ is the object the human wants, and this is hidden information for the robot. 
+	\item $d$ is the dialogue state - what question was asked previously by the robot.
+	\item Here $B(i \in \mathcal{I} == \iota)$ is the belief distribution of the robot over the items in $\mathcal{I}$. In the POMDP formulation $B$ would be part of the state that is hidden from the human. Instead we model a distribution that tracks $B$ allowing the human to solve an MDP instead of nested POMDPs. We will go back to the nested POMDP model repeatedly to make sure our MDP model is equivalent.
+	
+	\item Human's hunch of the robot's belief $H = P(\widehat{B}| \eta)$, where $\widehat{B}$ is an estimate of the distribution of $B$, it is over the set of items $\mathcal{I}$. $\eta$ is a set of priors that defines the distribution $\widehat{B}$, hence $H$ is over the space of all possible priors values. We propose to use the Dirichlet distribution to model $H$.  
+	
+	\end{enumerate}
+	
+
+	\item $A_h = \langle l,g \rangle$, where $A_h$ is the human action set and $l$ and $g$ are language and gesture actions respectively.
+	
+	\item If this were a POMDP we would need observation functions and a observation set. \begin{enumerate}
+	
+	
+
+	
+	\item $\Omega_h  = \langle A_r \rangle$, where $A_r$ is the set of robot actions and $\Omega_h$ is the set of human observations.
+	
+	\item $O = P(A_r | \iota, \mathcal{I}, d, H, B)$ is the observation function and it is hand coded by us so we know it, since we know the robots response to all the belief states.
+	
+	\item $T = P(\iota', \mathcal{I}',d',H',B' |\iota, \mathcal{I},d,H,B, a_h,a_r) = P(\iota', \mathcal{I}',d'|\iota, \mathcal{I},d,H,B, a_h,a_r) \times P(H' |\iota, \mathcal{I},d,H,B, a_h,a_r) \times P(B' |\iota, \mathcal{I},d,H,B, a_h,a_r)$  is the transition function.
+	
+	\end{enumerate}
+	
+	\item MDP formulation of this problem would not need the observation set or the observation functions, instead $H$ would get updated based on $A_r$ and $A_h$. This just has a transition function now defined as\\
+	$T = P(\iota', \mathcal{I}',d',H'|\iota, \mathcal{I},d,H, a_h,a_r) = P(\iota', \mathcal{I}',d'|\iota, \mathcal{I},d,H, a_h,a_r) \times P(H' |\iota, \mathcal{I},d,H,B, a_h,a_r)$
+	The conditional independence of the human's hunch $H$ from the distribution over the required item, or set of items left over or the last question asked comes from visible robot actions.
+	$P(H' |\iota, \mathcal{I},d,H,B, a_h,a_r)$ is being designed by us as an approximation and we need to think of data intensive methods of measuring this transition.
+	$P(\iota', \mathcal{I}',d'|\iota, \mathcal{I},d,H, a_h,a_r) =  $
+	
+	
+	
+	
+	
+	\{ \texttt{wait}, \texttt{pick(object)}, \texttt{ask(property)} \}
+	\item $T = p(\omega^\prime, \mathcal{O}^\prime, ds^\prime| \omega, \mathcal{O}, ds, a)$
+
+		If $a$ is a pick action and $a.object == \omega$:
+		\begin{equation*}
+			p(\omega^\prime, \mathcal{O}^\prime, ds^\prime| \omega, \mathcal{O}, ds, a) = \begin{cases}
+				1 / |\mathcal{O} \setminus \omega| & \text{ if $\omega^\prime != \omega, ds = None, \mathcal{O}^\prime = \mathcal{O}\setminus \omega$} \\
+				0 & \text{otherwise}
+			\end{cases}
+		\end{equation*}
+
+		If $a$ is a pick action and $a.object != \omega$, we transition to the state where $s^\prime = \langle \omega^\prime, \mathcal{O}^\prime, ds^\prime \rangle = \langle \omega, \mathcal{O} \setminus a.object, ds\rangle$. 
+
+	\item 
+		\begin{equation*}
+			R(\omega, \mathcal{O}, ds, a) = 
+			\begin{cases}
+				10 & \text{ if a == \texttt{pick} and a.object == $\omega$} \\
+				-80 & \text{ if a == \texttt{pick} and a.object != $\omega$} \\
+				-1 & \text{ if a == \texttt{wait}} \\
+				-3 & \text{ if a == \texttt{ask}}
+			\end{cases}
+		\end{equation*}
+	\item $\Omega = \langle l, g \rangle$
+	\item $O = p(l, g | \omega, \mathcal{O}, ds, a) = p(l | \omega, \mathcal{O}, ds, a)  p(g | \omega, \mathcal{O}, ds, a)    $
+
+\begin{align}
+	p(l|\mathcal{O},\omega,a) &= 
+p(c|\omega^{t+1}, a^t)\prod_{w \in l} p(w|\omega,a)
+\end{align}
+
+
+\begin{equation}
+	p(c|a^t) = \begin{cases}
+		0.8 & \text{if $a^t$ is a question} \\
+		0.2 & \text{otherwise}
+	\end{cases}
+\end{equation}
+
+$$p(w|\omega, a) = \frac{\text{Number of times $w$ is used to describe $\omega$}}{ \text{Total counts for words describing $\omega$}}$$
+
+
+
+
+
+\end{enumerate}
+
+\end{document}
