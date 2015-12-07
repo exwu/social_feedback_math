@@ -1,6 +1,9 @@
 %% Things to do
 \documentclass{article}
 \usepackage{amsmath}
+
+\newcommand{\myitem}{\stepcounter{enumi}\item[$*$\theenumi.]}
+
 \title{Math for the human - robot multilevel POMDP}
 \date{}
 \begin{document}
@@ -18,7 +21,7 @@ This is a MDP that the human runs in their mind. It can be formalized as a POMDP
 	\item Here $\mathcal{I}$ is the set of items the robot can pass. 
 	\item Item $\iota$ is the object the human wants, and this is hidden information for the robot. 
 	\item $d$ is the dialogue state - what question was asked previously by the robot.
-	\item Here $B(i) = P(i == \iota), \forall \in \mathcal{I}$ is the belief distribution of the robot over the items in $\mathcal{I}$. In the POMDP formulation $B$ would be part of the state that is hidden from the human. Instead we model a distribution that tracks $B$ allowing the human to solve an MDP instead of nested POMDPs. We will go back to the nested POMDP model repeatedly to make sure our MDP model is equivalent.
+	\item Here $B(i) = P(i == \iota), \forall \in \mathcal{I}$ is the belief distribution of the robot for human's needed item for all the items in $\mathcal{I}$. In the POMDP formulation $B$ would be part of the state that is hidden from the human. Instead we model a distribution that tracks $B$ allowing the human to solve an MDP instead of nested POMDPs. We will go back to the nested POMDP model repeatedly to make sure our MDP model is equivalent.
 	
 	\item Human's hunch of the robot's belief $H = P(\widehat{B}| \eta)$, where $\widehat{B}$ is an estimate of the distribution of $B$, it is over the set of items $\mathcal{I}$. $\eta$ is a set of priors that defines the distribution $\widehat{B}$, hence $H$ is over the space of all possible priors values. We propose to use the Dirichlet distribution to model $H$.  
 	
@@ -40,8 +43,10 @@ This is a MDP that the human runs in their mind. It can be formalized as a POMDP
 	
 	\end{enumerate}
 	
-	\item MDP formulation of this problem would not need the observation set or the observation functions, instead $H$ would get updated based on $A_r$ and $A_h$. This just has a transition function now defined as\\
-	$T = P(\iota', \mathcal{I}',d',H'|\iota, \mathcal{I},d,H, a_h,a_r) = P(\iota', \mathcal{I}',d'|\iota, \mathcal{I},d,H, a_h,a_r) \times P(H' |\iota, \mathcal{I},d,H,B, a_h,a_r)$
+	\myitem MDP formulation of this problem would not need the observation set or the observation functions, instead $H$ would get updated based on $A_r$ and $A_h$. This just has a transition function now defined as\\
+	\begin{eqnarray}
+	T =& P(\iota', \mathcal{I}',d',H'|\iota, \mathcal{I},d,H, a_h,a_r)\\ =& P(\iota', \mathcal{I}',d'|\iota, \mathcal{I},d,H, a_h,a_r) \times P(H' |\iota, \mathcal{I},d,H,B, a_h,a_r)
+	\end{eqnarray}. 
 	The conditional independence of the human's hunch $H$ from the distribution over the required item, or set of items left over or the last question asked comes from visible robot actions.
 	$P(H' |\iota, \mathcal{I},d,H,B, a_h,a_r)$ is being designed by us as an approximation and we need to think of data intensive methods of measuring this transition.
 	If $a_r$ is a pick action and $i$ is the object picked:
@@ -60,10 +65,19 @@ This is a MDP that the human runs in their mind. It can be formalized as a POMDP
 	\end{equation}
 	
 	\item The reward for the human subject is not well defined, but we can assume that the net reward is for both human and the robot, since this is a co-operative domain.
-	
+\end{enumerate}	
 	
 \section{Robot POMDP}
+\begin{enumerate}
 
+
+\item $S = \langle \iota, \mathcal{I}, d, Mo(H), B \rangle$.
+Here $Mo(H)$ is the mode of the distribution $H$ which is unknown and $B$ is the known belief over items. The belief state over items is part of the second level state.
+\item $A_r = ${{\texttt wait}, {\texttt pick(object)},{\texttt  ask(property)}, {\texttt  point(property)}}
+\item $\Omega_r = \langle l,g \rangle$
+\myitem $O = P(o | \iota, \mathcal{I}, a_r, a_h, Mo(H))$ : this is a unigram based model, if we assume $Mo(H)$ to be a countable set then we can count these observation probabilities, for different $a_r$, $\iota$ and $Mo(H)$. We assume that there is a data intensive way of computing $H$ repeated and calculate its mode $Mo(H)$.
+\item $T = $
+\item $R$: Reward function can be a combination of regular rewards like large penalties for a wrong pick and low for an ask, point, and wait. Small positive rewards for the correct pick. We have to figure out if a reward hack of $KL(B||Mo(H))$ is worth pursuing. We are not sure this can be called reward shaping as we don't know if the optimal policy will remain the same under this shaping function. 
 
 
 \end{enumerate}
