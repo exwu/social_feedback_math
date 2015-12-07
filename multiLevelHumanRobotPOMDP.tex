@@ -1,11 +1,12 @@
 %% Things to do
 \documentclass{article}
 \usepackage{amsmath}
-
+\title{Math for the human - robot multilevel POMDP}
+\date{}
 \begin{document}
-
+\maketitle
 \section{Human (PO)MDP}
-This is a MDP that the human runs in their mind. It can be formalized as a POMDP, but right now we have a weak POMDP with a a belief distribution over the robot's distribution of objects.
+This is a MDP that the human runs in their mind. It can be formalized as a POMDP, but right now we design it to be an MDP with a a belief distribution over the robot's distribution of objects. We repeatedly look at what the nested POMDP would look like to model our MDP.
 
 
 
@@ -17,7 +18,7 @@ This is a MDP that the human runs in their mind. It can be formalized as a POMDP
 	\item Here $\mathcal{I}$ is the set of items the robot can pass. 
 	\item Item $\iota$ is the object the human wants, and this is hidden information for the robot. 
 	\item $d$ is the dialogue state - what question was asked previously by the robot.
-	\item Here $B(i \in \mathcal{I} == \iota)$ is the belief distribution of the robot over the items in $\mathcal{I}$. In the POMDP formulation $B$ would be part of the state that is hidden from the human. Instead we model a distribution that tracks $B$ allowing the human to solve an MDP instead of nested POMDPs. We will go back to the nested POMDP model repeatedly to make sure our MDP model is equivalent.
+	\item Here $B(i) = P(i == \iota), \forall \in \mathcal{I}$ is the belief distribution of the robot over the items in $\mathcal{I}$. In the POMDP formulation $B$ would be part of the state that is hidden from the human. Instead we model a distribution that tracks $B$ allowing the human to solve an MDP instead of nested POMDPs. We will go back to the nested POMDP model repeatedly to make sure our MDP model is equivalent.
 	
 	\item Human's hunch of the robot's belief $H = P(\widehat{B}| \eta)$, where $\widehat{B}$ is an estimate of the distribution of $B$, it is over the set of items $\mathcal{I}$. $\eta$ is a set of priors that defines the distribution $\widehat{B}$, hence $H$ is over the space of all possible priors values. We propose to use the Dirichlet distribution to model $H$.  
 	
@@ -43,54 +44,25 @@ This is a MDP that the human runs in their mind. It can be formalized as a POMDP
 	$T = P(\iota', \mathcal{I}',d',H'|\iota, \mathcal{I},d,H, a_h,a_r) = P(\iota', \mathcal{I}',d'|\iota, \mathcal{I},d,H, a_h,a_r) \times P(H' |\iota, \mathcal{I},d,H,B, a_h,a_r)$
 	The conditional independence of the human's hunch $H$ from the distribution over the required item, or set of items left over or the last question asked comes from visible robot actions.
 	$P(H' |\iota, \mathcal{I},d,H,B, a_h,a_r)$ is being designed by us as an approximation and we need to think of data intensive methods of measuring this transition.
-	$P(\iota', \mathcal{I}',d'|\iota, \mathcal{I},d,H, a_h,a_r) =  $
-	
-	
-	
-	
-	
-	\{ \texttt{wait}, \texttt{pick(object)}, \texttt{ask(property)} \}
-	\item $T = p(\omega^\prime, \mathcal{O}^\prime, ds^\prime| \omega, \mathcal{O}, ds, a)$
-
-		If $a$ is a pick action and $a.object == \omega$:
-		\begin{equation*}
-			p(\omega^\prime, \mathcal{O}^\prime, ds^\prime| \omega, \mathcal{O}, ds, a) = \begin{cases}
-				1 / |\mathcal{O} \setminus \omega| & \text{ if $\omega^\prime != \omega, ds = None, \mathcal{O}^\prime = \mathcal{O}\setminus \omega$} \\
-				0 & \text{otherwise}
-			\end{cases}
-		\end{equation*}
-
-		If $a$ is a pick action and $a.object != \omega$, we transition to the state where $s^\prime = \langle \omega^\prime, \mathcal{O}^\prime, ds^\prime \rangle = \langle \omega, \mathcal{O} \setminus a.object, ds\rangle$. 
-
-	\item 
-		\begin{equation*}
-			R(\omega, \mathcal{O}, ds, a) = 
-			\begin{cases}
-				10 & \text{ if a == \texttt{pick} and a.object == $\omega$} \\
-				-80 & \text{ if a == \texttt{pick} and a.object != $\omega$} \\
-				-1 & \text{ if a == \texttt{wait}} \\
-				-3 & \text{ if a == \texttt{ask}}
-			\end{cases}
-		\end{equation*}
-	\item $\Omega = \langle l, g \rangle$
-	\item $O = p(l, g | \omega, \mathcal{O}, ds, a) = p(l | \omega, \mathcal{O}, ds, a)  p(g | \omega, \mathcal{O}, ds, a)    $
-
-\begin{align}
-	p(l|\mathcal{O},\omega,a) &= 
-p(c|\omega^{t+1}, a^t)\prod_{w \in l} p(w|\omega,a)
-\end{align}
-
-
-\begin{equation}
-	p(c|a^t) = \begin{cases}
-		0.8 & \text{if $a^t$ is a question} \\
-		0.2 & \text{otherwise}
+	If $a_r$ is a pick action and $i$ is the object picked:
+	\begin{equation}
+	P(\iota', \mathcal{I}',d'|\iota, \mathcal{I},d,H, a_h,a_r) =  \begin{cases}
+	1/|\mathcal{I}\i| \text{ if $i!= \iota$} \\
+	0 & \text{otherwise}
 	\end{cases}
-\end{equation}
-
-$$p(w|\omega, a) = \frac{\text{Number of times $w$ is used to describe $\omega$}}{ \text{Total counts for words describing $\omega$}}$$
-
-
+	\end{equation}
+	If $a_r$ is an ask question 
+	\begin{equation}
+	P(\iota', \mathcal{I}',d'|\iota, \mathcal{I},d,H, a_h,a_r) =  \begin{cases}
+	1 \text{ if $d' =$ a.ask} \\
+	0 & \text{otherwise}
+	\end{cases}
+	\end{equation}
+	
+	\item The reward for the human subject is not well defined, but we can assume that the net reward is for both human and the robot, since this is a co-operative domain.
+	
+	
+\section{Robot POMDP}
 
 
 
