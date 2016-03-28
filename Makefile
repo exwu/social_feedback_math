@@ -1,2 +1,2 @@
 default: 
-	pdflatex math.tex
+	pdflatex observation_function.tex
